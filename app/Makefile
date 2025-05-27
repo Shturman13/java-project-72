@@ -16,6 +16,9 @@ test:
 report:
 	./gradlew jacocoTestReport
 
+sonar: 
+	./gradlew
+
 
 .PHONY: build clean lint config test
 
