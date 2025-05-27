@@ -19,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Execute Gradle build
-        run: ./app/gradlew build
+        run: make build
       - name: Generate coverage report
         run: make report
       - name: Cache SonarQube packages
