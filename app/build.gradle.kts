@@ -3,6 +3,8 @@ plugins {
     checkstyle
     jacoco
     id("org.sonarqube") version "6.2.0.5505"
+    application
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "hexlet.code"
@@ -15,10 +17,20 @@ repositories {
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    implementation("io.javalin:javalin:6.6.0")
+    implementation("org.slf4j:slf4j-simple:2.0.16")
+    compileOnly("org.projectlombok:lombok:1.18.38")
+    annotationProcessor("org.projectlombok:lombok:1.18.38")
+    testCompileOnly("org.projectlombok:lombok:1.18.38")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.38")
 }
 
 tasks.test {
     useJUnitPlatform()
+}
+
+application {
+    mainClass = "hexlet.code.App"
 }
 
 tasks.jacocoTestReport { reports { xml.required.set(true) } }
