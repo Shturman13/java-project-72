@@ -25,7 +25,7 @@ WORKDIR /app
 COPY --from=builder /app/build/install/app /app
 
 # Указываем команду для запуска приложения
-CMD ["./bin/app"]
+CMD ["./build/install/app/bin/app"]
 
 #FROM gradle:7.4.0-jdk17
 #
