@@ -39,7 +39,7 @@ public class App {
 
     public static void main(String[] args) {
         Javalin app = getApp();
-        int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "7070"));
+        int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "5432"));
         app.start(port);
     }
 }
