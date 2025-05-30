@@ -23,6 +23,10 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.38")
     testCompileOnly("org.projectlombok:lombok:1.18.38")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.38")
+    implementation ("com.zaxxer:HikariCP:6.3.0")
+    implementation ("org.postgresql:postgresql:42.7.4") // Для PostgreSQL
+    implementation("com.h2database:h2:2.3.232")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
 }
 
 tasks.test {
