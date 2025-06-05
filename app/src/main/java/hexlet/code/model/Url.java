@@ -16,7 +16,8 @@ public class Url {
         this.createdAt = createdAt;
     }
 
-    public Url() {
-
+    @Override
+    public String toString() {
+        return "Url{id=" + id + ", name='" + name + "', createdAt=" + createdAt + "}";
     }
 }
