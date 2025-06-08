@@ -19,6 +19,7 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Optional;
 
 @Slf4j
@@ -26,7 +27,9 @@ public class App {
     private static TemplateEngine createTemplateEngine() {
         ClassLoader classLoader = App.class.getClassLoader();
         ResourceCodeResolver codeResolver = new ResourceCodeResolver("templates", classLoader);
-        return TemplateEngine.create(codeResolver, ContentType.Html);
+        TemplateEngine templateEngine = TemplateEngine.create(codeResolver, ContentType.Html);
+//        templateEngine.setCacheEnabled(false);
+        return templateEngine;
     }
 
     public static Javalin getApp() {
@@ -40,9 +43,9 @@ public class App {
         });
 
         app.get("/", ctx -> {
-            ctx.attribute("flash", ctx.consumeSessionAttribute("flash"));
-            ctx.attribute("flashType", ctx.consumeSessionAttribute("flashType"));
-            ctx.render("index.jte");
+            String flash = ctx.consumeSessionAttribute("flash");
+            String flashType = ctx.consumeSessionAttribute("flashType");
+            ctx.render("index.jte", Collections.singletonMap("flash", flash != null ? flash : ""));
         });
 
         app.post("/urls", ctx -> {
@@ -54,6 +57,22 @@ public class App {
                 ctx.sessionAttribute("flashType", "danger");
                 ctx.redirect("/");
                 return;
+
+//                String contentType = ctx.header("Content-Type");
+//                log.info("Received Headers: {}", ctx.headerMap());
+//                log.info("Received Body: {}", ctx.body());
+//                log.info("Content-Type: {}", contentType);
+//                log.info("Form Params: {}", ctx.formParamMap());
+//                if (contentType == null || !contentType.contains("application/x-www-form-urlencoded")) {
+//                    log.warn("Invalid Content-Type: {}", contentType);
+//                    ctx.status(400);
+//                    ctx.sessionAttribute("flash", "Некорректный Content-Type");
+//                    ctx.sessionAttribute("flashType", "danger");
+//                    ctx.redirect("/");
+//                    return;
+//                }
+//                String inputUrl = ctx.formParam("url");
+//                log.info("Received URL: {}", inputUrl);
             }
             String normalizedUrl;
             try {
@@ -78,7 +97,7 @@ public class App {
                 log.info("URL already exists: {}", normalizedUrl);
                 ctx.sessionAttribute("flash", "Страница уже существует");
                 ctx.sessionAttribute("flashType", "info");
-                ctx.redirect("/");
+                ctx.redirect("/urls");
                 return;
             }
             try {
@@ -88,11 +107,13 @@ public class App {
                 ctx.sessionAttribute("flash", "Страница успешно добавлена");
                 ctx.sessionAttribute("flashType", "success");
                 ctx.redirect("/urls");
+                return;
             } catch (Exception e) {
                 log.error("Error saving URL: {}", normalizedUrl, e);
                 ctx.sessionAttribute("flash", "Ошибка при добавлении URL");
                 ctx.sessionAttribute("flashType", "danger");
                 ctx.redirect("/");
+                return;
             }
         });
 
@@ -101,10 +122,6 @@ public class App {
             log.info("URLs retrieved: {}, content: {}", urls.size(), urls);
             String flash = ctx.consumeSessionAttribute("flash");
             String flashType = ctx.consumeSessionAttribute("flashType");
-            ctx.attribute("urls", urls != null ? urls : Collections.emptyList());
-            ctx.attribute("flash", flash);
-            ctx.attribute("flashType", flashType);
-            log.info("Flash message: {}, type: {}", flash, flashType);
             ctx.render("urls.jte", Map.of(
                     "urls", urls != null ? urls : Collections.emptyList(),
                     "flash", flash != null ? flash : "",
@@ -113,30 +130,31 @@ public class App {
         });
 
         app.get("/urls/{id}", ctx -> {
-            Long id = ctx.pathParamAsClass("id", Long.class).getOrDefault(null);
-            if (id == null) {
+            Long id;
+            try {
+                id = ctx.pathParamAsClass("id", Long.class).get();
+            } catch (Exception e) {
+                log.error("Invalid ID format: {}", ctx.pathParam("id"), e);
                 ctx.status(400);
-                ctx.attribute("flash", "Неверный ID");
-                ctx.attribute("flashType", "danger");
-                log.warn("Invalid ID provided");
-                ctx.render("urls/show.jte", Map.of("url", null, "flash", "Неверный ID", "flashType", "danger"));
+                ctx.sessionAttribute("flash", "Некорректный ID");
+                ctx.sessionAttribute("flashType", "danger");
+                ctx.redirect("/urls");
                 return;
             }
             Optional<Url> url = urlRepository.findById(id);
-            if (url.isEmpty()) {
-                ctx.status(404);
-                ctx.attribute("flash", "URL не найден");
-                ctx.attribute("flashType", "danger");
-                log.warn("URL not found for ID: {}", id);
-                ctx.render("urls/show.jte", Map.of("url", null, "flash", "URL не найден", "flashType", "danger"));
-                return;
-            }
             String flash = ctx.consumeSessionAttribute("flash");
             String flashType = ctx.consumeSessionAttribute("flashType");
-            Url urlObj = url.get();
-            log.info("Rendering URL details for ID: {}, URL: {}", id, urlObj);
+            if (url.isEmpty()) {
+                ctx.status(404);
+                Map<String, Object> model = new HashMap<>();
+                model.put("url", null);
+                model.put("flash", flash != null ? flash : "URL не найден");
+                model.put("flashType", flashType != null ? flashType : "danger");
+                ctx.render("urls/show.jte", model);
+                return;
+            }
             ctx.render("urls/show.jte", Map.of(
-                    "url", urlObj,
+                    "url", url.get(),
                     "flash", flash != null ? flash : "",
                     "flashType", flashType != null ? flashType : ""
             ));
@@ -151,3 +169,5 @@ public class App {
         app.start(port);
     }
 }
+
+

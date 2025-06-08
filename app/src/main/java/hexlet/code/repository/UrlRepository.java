@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,11 +32,7 @@ public class UrlRepository {
             if (rows > 0) {
                 ResultSet rs = stmt.getGeneratedKeys();
                 if (rs.next()) {
-                    long generatedId = rs.getLong(1);
-                    url.setId(generatedId);
-                    log.info("Generated ID for URL {}: {}", url.getName(), generatedId);
-                } else {
-                    log.warn("No generated ID returned for URL: {}", url.getName());
+                    url.setId(rs.getLong(1));
                 }
             }
         }
@@ -55,6 +52,7 @@ public class UrlRepository {
             log.info("Found {} URLs", urls.size());
         } catch (SQLException e) {
             log.error("Error retrieving URLs", e);
+            return Collections.emptyList();
         }
         return urls;
     }
@@ -68,15 +66,13 @@ public class UrlRepository {
             if (rs.next()) {
                 Url url = new Url(rs.getString("name"), rs.getTimestamp("created_at"));
                 url.setId(rs.getLong("id"));
-                log.info("Found URL by ID {}: {}", id, url);
                 return Optional.of(url);
-            } else {
-                log.warn("No URL found for ID: {}", id);
             }
+            return Optional.empty();
         } catch (SQLException e) {
-            log.error("Error finding URL by ID: {}", id, e);
+            log.error("Error finding URL by id: {}", id, e);
+            return Optional.empty();
         }
-        return Optional.empty();
     }
 
     public Optional<Url> findByName(String name) {
@@ -88,12 +84,12 @@ public class UrlRepository {
             if (rs.next()) {
                 Url url = new Url(rs.getString("name"), rs.getTimestamp("created_at"));
                 url.setId(rs.getLong("id"));
-                log.info("Found URL by name {}: {}", name, url);
                 return Optional.of(url);
             }
+            return Optional.empty();
         } catch (SQLException e) {
             log.error("Error finding URL by name: {}", name, e);
+            return Optional.empty();
         }
-        return Optional.empty();
     }
 }
