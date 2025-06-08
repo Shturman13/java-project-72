@@ -68,18 +68,19 @@ tasks.test {
     }
 }
 
-//tasks.jacocoTestReport {
-//    reports {
-//        xml.required.set(true)
-//        html.required.set(true)
-//        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
-//    }
-//}
+tasks.jacocoTestReport {
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    }
+}
 
 sonar {
     properties {
         property("sonar.projectKey", "Shturman13_java-project-72")
         property("sonar.organization", "shturman13")
         property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.coverage.jacoco.xmlReportPaths", "app/build/reports/jacoco/test/jacocoTestReport.xml")
     }
 }
