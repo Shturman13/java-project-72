@@ -20,7 +20,8 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           fetch-depth: 0
-      - name: make test
+      - name: Execute Tests
+        run: make test
       - name: Execute Gradle build
         run: make build
       - name: Generate coverage report
