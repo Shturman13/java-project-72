@@ -9,7 +9,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,15 +29,16 @@ public class UrlRepository {
             int rows = stmt.executeUpdate();
             log.info("Rows affected by save: {}", rows);
             if (rows > 0) {
-                ResultSet rs = stmt.getGeneratedKeys();
-                if (rs.next()) {
-                    url.setId(rs.getLong(1));
+                try (ResultSet rs = stmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        url.setId(rs.getLong(1));
+                    }
                 }
             }
         }
     }
 
-    public List<Url> findAll() {
+    public List<Url> findAll() throws SQLException {
         String sql = "SELECT id, name, created_at FROM page_analyzer";
         List<Url> urls = new ArrayList<>();
         try (Connection conn = dataSource.getConnection();
@@ -50,46 +50,39 @@ public class UrlRepository {
                 urls.add(url);
             }
             log.info("Found {} URLs", urls.size());
-        } catch (SQLException e) {
-            log.error("Error retrieving URLs", e);
-            return Collections.emptyList();
+            return urls;
         }
-        return urls;
     }
 
-    public Optional<Url> findById(Long id) {
+    public Optional<Url> findById(Long id) throws SQLException {
         String sql = "SELECT id, name, created_at FROM page_analyzer WHERE id = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, id);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                Url url = new Url(rs.getString("name"), rs.getTimestamp("created_at"));
-                url.setId(rs.getLong("id"));
-                return Optional.of(url);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Url url = new Url(rs.getString("name"), rs.getTimestamp("created_at"));
+                    url.setId(rs.getLong("id"));
+                    return Optional.of(url);
+                }
+                return Optional.empty();
             }
-            return Optional.empty();
-        } catch (SQLException e) {
-            log.error("Error finding URL by id: {}", id, e);
-            return Optional.empty();
         }
     }
 
-    public Optional<Url> findByName(String name) {
+    public Optional<Url> findByName(String name) throws SQLException {
         String sql = "SELECT id, name, created_at FROM page_analyzer WHERE name = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, name);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                Url url = new Url(rs.getString("name"), rs.getTimestamp("created_at"));
-                url.setId(rs.getLong("id"));
-                return Optional.of(url);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Url url = new Url(rs.getString("name"), rs.getTimestamp("created_at"));
+                    url.setId(rs.getLong("id"));
+                    return Optional.of(url);
+                }
+                return Optional.empty();
             }
-            return Optional.empty();
-        } catch (SQLException e) {
-            log.error("Error finding URL by name: {}", name, e);
-            return Optional.empty();
         }
     }
 }
