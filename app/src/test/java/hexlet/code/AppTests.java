@@ -265,7 +265,7 @@ public class AppTests {
             <h1>Test H1</h1>
         </body>
         </html>
-                    """;
+            """;
 
         mockWebServer.enqueue(new MockResponse()
                 .setResponseCode(200)

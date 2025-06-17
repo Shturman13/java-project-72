@@ -51,7 +51,7 @@ dependencies {
     implementation ("org.jsoup:jsoup:1.15.3") // Для парсинга HTML
     testImplementation ("com.squareup.okhttp3:mockwebserver:4.9.3")
 
-    implementation ("org.eclipse.jetty:jetty-server:11.0.24") // Версия должна соответствовать Javalin
+    implementation ("org.eclipse.jetty:jetty-server:11.0.24")
 }
 
 tasks.test {
