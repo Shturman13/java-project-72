@@ -47,9 +47,9 @@ dependencies {
     testCompileOnly("org.projectlombok:lombok:1.18.38")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.38")
 
-    implementation ("com.konghq:unirest-java:3.13.6")
-    implementation ("org.jsoup:jsoup:1.15.3") // Для парсинга HTML
-    testImplementation ("com.squareup.okhttp3:mockwebserver:4.9.3")
+    implementation ("com.konghq:unirest-java:3.14.2")
+    implementation ("org.jsoup:jsoup:1.17.2") // Для парсинга HTML
+    testImplementation ("com.squareup.okhttp3:mockwebserver:4.12.0")
 
     implementation ("org.eclipse.jetty:jetty-server:11.0.24")
 }

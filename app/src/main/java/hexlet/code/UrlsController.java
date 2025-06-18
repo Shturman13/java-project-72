@@ -4,17 +4,13 @@ import hexlet.code.model.Url;
 import hexlet.code.model.UrlCheck;
 import hexlet.code.repository.UrlRepository;
 import hexlet.code.repository.UrlCheckRepository;
+import hexlet.code.service.UrlCheckService;
 import io.javalin.http.Context;
 import lombok.extern.slf4j.Slf4j;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLConnection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -28,11 +24,13 @@ import java.util.Optional;
 public class UrlsController {
     private static UrlRepository urlRepository;
     private static UrlCheckRepository urlCheckRepository;
+    private static UrlCheckService urlCheckService;
 
-    // Инициализация репозиториев
+    // Инициализация репозиториев и сервиса
     public static void init(UrlRepository urlRepo, UrlCheckRepository checkRepo) {
         urlRepository = urlRepo;
         urlCheckRepository = checkRepo;
+        urlCheckService = new UrlCheckService(urlCheckRepository);
     }
 
     public static void index(Context ctx) {
@@ -54,7 +52,7 @@ public class UrlsController {
             ctx.sessionAttribute("flashType", "danger");
             log.info("POST /urls: Set flash: {}, flashType: {}",
                     ctx.sessionAttribute("flash"), ctx.sessionAttribute("flashType"));
-            ctx.redirect(NamedRoutes.rootPath());
+            ctx.redirect(NamedRoutes.rootPath()); // Редирект на / для пустого URL
             return;
         }
         String normalizedUrl;
@@ -73,7 +71,7 @@ public class UrlsController {
             ctx.sessionAttribute("flashType", "danger");
             log.info("POST /urls: Set flash: {}, flashType: {}",
                     ctx.sessionAttribute("flash"), ctx.sessionAttribute("flashType"));
-            ctx.redirect(NamedRoutes.rootPath());
+            ctx.redirect(NamedRoutes.rootPath()); // Редирект на / при ошибке парсинга
             return;
         }
 
@@ -85,7 +83,7 @@ public class UrlsController {
                 ctx.sessionAttribute("flashType", "info");
                 log.info("POST /urls: Set flash: {}, flashType: {}",
                         ctx.sessionAttribute("flash"), ctx.sessionAttribute("flashType"));
-                ctx.redirect(NamedRoutes.urlsPath());
+                ctx.redirect(NamedRoutes.urlsPath()); // Редирект на /urls при дубликате
                 return;
             }
 
@@ -96,14 +94,14 @@ public class UrlsController {
             ctx.sessionAttribute("flashType", "success");
             log.info("POST /urls: Set flash: {}, flashType: {}",
                     ctx.sessionAttribute("flash"), ctx.sessionAttribute("flashType"));
-            ctx.redirect(NamedRoutes.urlsPath());
+            ctx.redirect(NamedRoutes.urlsPath()); // Редирект на /urls при успехе
         } catch (SQLException e) {
             log.error("Database error saving URL: {}", normalizedUrl, e);
             ctx.sessionAttribute("flash", "Ошибка при добавлении URL");
             ctx.sessionAttribute("flashType", "danger");
             log.info("POST /urls: Set flash: {}, flashType: {}",
                     ctx.sessionAttribute("flash"), ctx.sessionAttribute("flashType"));
-            ctx.redirect(NamedRoutes.rootPath());
+            ctx.redirect(NamedRoutes.rootPath()); // Редирект на / при SQL-ошибке
         }
     }
 
@@ -192,7 +190,7 @@ public class UrlsController {
         ));
     }
 
-    public static void check(Context ctx) throws SQLException {
+    public static void check(Context ctx) {
         Long id;
         try {
             id = ctx.pathParamAsClass("id", Long.class).get();
@@ -229,35 +227,13 @@ public class UrlsController {
         }
 
         try {
-            URLConnection conn = new URL(url.get().getName()).openConnection();
-            HttpURLConnection httpConn = (HttpURLConnection) conn;
-            httpConn.setConnectTimeout(2000);
-            httpConn.setReadTimeout(2000);
-            httpConn.setRequestMethod("GET");
-            httpConn.connect();
-
-            int statusCode = httpConn.getResponseCode();
-            Document doc = Jsoup.parse(httpConn.getInputStream(), "UTF-8", url.get().getName());
-            String title = doc.title();
-            String h1 = doc.selectFirst("h1") != null ? doc.selectFirst("h1").text() : "";
-            String description = doc.selectFirst("meta[name=description]") != null
-                    ? doc.selectFirst("meta[name=description]").attr("content") : "";
-
-            UrlCheck check = new UrlCheck();
-            check.setUrlId(id);
-            check.setStatusCode(statusCode);
-            check.setTitle(title);
-            check.setH1(h1);
-            check.setDescription(description);
-            check.setCreatedAt(Timestamp.from(Instant.now()));
-            urlCheckRepository.save(check);
-
+            UrlCheck check = urlCheckService.checkUrl(url.get());
             ctx.sessionAttribute("flash", "Проверка успешно выполнена");
             ctx.sessionAttribute("flashType", "success");
             log.info("POST /urls/{id}/checks: Set flash: {}, flashType: {}",
                     ctx.sessionAttribute("flash"), ctx.sessionAttribute("flashType"));
-        } catch (IOException e) {
-            log.error("HTTP request failed for URL {}: {}", url.get().getName(), e);
+        } catch (Exception e) {
+            log.error("Error during check for URL {}: {}", url.get().getName(), e.getMessage());
             ctx.sessionAttribute("flash", "Ошибка проверки");
             ctx.sessionAttribute("flashType", "danger");
             log.info("POST /urls/{id}/checks: Set flash: {}, flashType: {}",
