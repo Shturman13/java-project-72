@@ -53,7 +53,7 @@ public class UrlsController {
             ctx.sessionAttribute("flashType", "danger");
             log.info("POST /urls: Set flash: {}, flashType: {}",
                     ctx.sessionAttribute("flash"), ctx.sessionAttribute("flashType"));
-            ctx.redirect(NamedRoutes.rootPath()); // Редирект на / для пустого URL
+            ctx.redirect(NamedRoutes.rootPath()); // 302 на /
             return;
         }
         String normalizedUrl;
@@ -72,7 +72,7 @@ public class UrlsController {
             ctx.sessionAttribute("flashType", "danger");
             log.info("POST /urls: Set flash: {}, flashType: {}",
                     ctx.sessionAttribute("flash"), ctx.sessionAttribute("flashType"));
-            ctx.redirect(NamedRoutes.rootPath()); // Редирект на / при ошибке парсинга
+            ctx.redirect(NamedRoutes.rootPath()); // 302 на /
             return;
         }
 
@@ -84,7 +84,7 @@ public class UrlsController {
                 ctx.sessionAttribute("flashType", "info");
                 log.info("POST /urls: Set flash: {}, flashType: {}",
                         ctx.sessionAttribute("flash"), ctx.sessionAttribute("flashType"));
-                ctx.redirect(NamedRoutes.urlsPath()); // Редирект на /urls при дубликате
+                ctx.redirect(NamedRoutes.urlsPath()); // 302 на /urls
                 return;
             }
 
@@ -95,14 +95,14 @@ public class UrlsController {
             ctx.sessionAttribute("flashType", "success");
             log.info("POST /urls: Set flash: {}, flashType: {}",
                     ctx.sessionAttribute("flash"), ctx.sessionAttribute("flashType"));
-            ctx.redirect(NamedRoutes.urlsPath()); // Редирект на /urls при успехе
+            ctx.redirect(NamedRoutes.urlsPath()); // 302 на /urls
         } catch (SQLException e) {
             log.error("Database error saving URL: {}", normalizedUrl, e);
             ctx.sessionAttribute("flash", "Ошибка при добавлении URL");
             ctx.sessionAttribute("flashType", "danger");
             log.info("POST /urls: Set flash: {}, flashType: {}",
                     ctx.sessionAttribute("flash"), ctx.sessionAttribute("flashType"));
-            ctx.redirect(NamedRoutes.rootPath()); // Редирект на / при SQL-ошибке
+            ctx.redirect(NamedRoutes.rootPath()); // 302 на /
         }
     }
 
@@ -242,43 +242,5 @@ public class UrlsController {
         }
 
         ctx.redirect(NamedRoutes.urlPath(id));
-    }
-
-    public static void createApi(Context ctx) {
-        String inputUrl = ctx.formParam("url");
-        log.info("Received URL: {}", inputUrl);
-        if (inputUrl == null || inputUrl.isBlank()) {
-            ctx.status(HttpStatus.BAD_REQUEST).json(Map.of("error", "Некорректный URL"));
-            return;
-        }
-        String normalizedUrl;
-        try {
-            URL url = URI.create(inputUrl).toURL();
-            StringBuilder sb = new StringBuilder();
-            sb.append(url.getProtocol()).append("://").append(url.getHost());
-            if (url.getPort() != -1) {
-                sb.append(":").append(url.getPort());
-            }
-            normalizedUrl = sb.toString().toLowerCase();
-            log.info("Normalized URL: {}", normalizedUrl);
-        } catch (MalformedURLException | IllegalArgumentException e) {
-            ctx.status(HttpStatus.BAD_REQUEST).json(Map.of("error", "Некорректный URL"));
-            return;
-        }
-
-        try {
-            Optional<Url> existingUrl = urlRepository.findByName(normalizedUrl);
-            if (existingUrl.isPresent()) {
-                ctx.status(HttpStatus.CONFLICT).json(Map.of("error", "Страница уже существует"));
-                return;
-            }
-
-            Url url = new Url(normalizedUrl, Timestamp.from(Instant.now()));
-            urlRepository.save(url);
-            log.info("URL saved: {}", normalizedUrl);
-            ctx.status(HttpStatus.CREATED).json(Map.of("id", url.getId(), "url", url.getName()));
-        } catch (SQLException e) {
-            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).json(Map.of("error", "Ошибка при добавлении URL"));
-        }
     }
 }
