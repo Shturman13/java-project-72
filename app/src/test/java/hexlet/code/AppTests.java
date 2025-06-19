@@ -20,7 +20,10 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 
+import javax.sql.DataSource;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -76,12 +79,23 @@ public class AppTests {
 
     @BeforeEach
     void setUp() throws SQLException {
-        try (var conn = DataSourceConfig.getDataSource().getConnection();
+        DataSource dataSource = DataSourceConfig.getDataSource();
+        try (Connection conn = dataSource.getConnection();
              var stmt = conn.createStatement()) {
-            stmt.execute("SET REFERENTIAL_INTEGRITY FALSE");
-            stmt.execute("TRUNCATE TABLE url_checks RESTART IDENTITY");
-            stmt.execute("TRUNCATE TABLE page_analyzer RESTART IDENTITY");
-            stmt.execute("SET REFERENTIAL_INTEGRITY TRUE");
+            DatabaseMetaData metaData = conn.getMetaData();
+            String dbProductName = metaData.getDatabaseProductName().toLowerCase();
+
+            if ("postgresql".equals(dbProductName)) {
+                // Для PostgreSQL
+                stmt.execute("TRUNCATE TABLE url_checks RESTART IDENTITY CASCADE");
+                stmt.execute("TRUNCATE TABLE page_analyzer RESTART IDENTITY CASCADE");
+            } else {
+                // Для H2
+                stmt.execute("SET REFERENTIAL_INTEGRITY FALSE");
+                stmt.execute("TRUNCATE TABLE url_checks RESTART IDENTITY");
+                stmt.execute("TRUNCATE TABLE page_analyzer RESTART IDENTITY");
+                stmt.execute("SET REFERENTIAL_INTEGRITY TRUE");
+            }
         }
         try {
             app = App.getApp();
