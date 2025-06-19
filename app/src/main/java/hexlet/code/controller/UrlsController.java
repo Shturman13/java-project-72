@@ -7,7 +7,6 @@ import hexlet.code.repository.UrlRepository;
 import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.service.UrlCheckService;
 import io.javalin.http.Context;
-import io.javalin.http.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.MalformedURLException;
