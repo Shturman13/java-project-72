@@ -5,8 +5,8 @@ plugins {
     id("java")
     checkstyle
     jacoco
-    id("org.sonarqube") version "6.2.0.5505"
     application
+    id("org.sonarqube") version "6.2.0.5505"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
@@ -20,13 +20,11 @@ repositories {
 dependencies {
     implementation("com.h2database:h2:2.3.232")
     implementation("com.zaxxer:HikariCP:6.3.0")
-    implementation ("org.postgresql:postgresql:42.7.4")
+    implementation ("org.postgresql:postgresql:42.7.7")
 
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.3")
 
     implementation("org.apache.commons:commons-text:1.13.1")
-
-//    implementation("org.slf4j:slf4j-simple:2.0.17")
 
     implementation("io.javalin:javalin:6.6.0")
     implementation("io.javalin:javalin-bundle:6.6.0")
@@ -49,7 +47,7 @@ dependencies {
     testAnnotationProcessor("org.projectlombok:lombok:1.18.38")
 
     implementation ("com.konghq:unirest-java:3.14.2")
-    implementation ("org.jsoup:jsoup:1.17.2") // Для парсинга HTML
+    implementation ("org.jsoup:jsoup:1.17.2")
     testImplementation ("com.squareup.okhttp3:mockwebserver:4.12.0")
 
     implementation ("org.eclipse.jetty:jetty-server:11.0.24")

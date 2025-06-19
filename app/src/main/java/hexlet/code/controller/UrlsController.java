@@ -1,5 +1,6 @@
-package hexlet.code;
+package hexlet.code.controller;
 
+import hexlet.code.NamedRoutes;
 import hexlet.code.model.Url;
 import hexlet.code.model.UrlCheck;
 import hexlet.code.repository.UrlRepository;
@@ -26,7 +27,6 @@ public class UrlsController {
     private static UrlCheckRepository urlCheckRepository;
     private static UrlCheckService urlCheckService;
 
-    // Инициализация репозиториев и сервиса
     public static void init(UrlRepository urlRepo, UrlCheckRepository checkRepo) {
         urlRepository = urlRepo;
         urlCheckRepository = checkRepo;

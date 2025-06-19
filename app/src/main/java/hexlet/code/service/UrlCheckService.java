@@ -1,4 +1,3 @@
-// src/main/java/hexlet/code/service/UrlCheckService.java
 package hexlet.code.service;
 
 import hexlet.code.model.Url;
@@ -12,6 +11,7 @@ import org.jsoup.nodes.Document;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Objects;
 
 public class UrlCheckService {
     private final UrlCheckRepository urlCheckRepository;
@@ -31,9 +31,9 @@ public class UrlCheckService {
 
             Document doc = Jsoup.parse(body);
             String title = doc.title().isEmpty() ? null : doc.title();
-            String h1 = doc.selectFirst("h1") != null ? doc.selectFirst("h1").text() : null;
+            String h1 = doc.selectFirst("h1") != null ? Objects.requireNonNull(doc.selectFirst("h1")).text() : null;
             String description = doc.selectFirst("meta[name=description]") != null
-                    ? doc.selectFirst("meta[name=description]").attr("content") : null;
+                    ? Objects.requireNonNull(doc.selectFirst("meta[name=description]")).attr("content") : null;
 
             UrlCheck check = new UrlCheck();
             check.setUrlId(url.getId());
@@ -45,10 +45,11 @@ public class UrlCheckService {
 
             urlCheckRepository.save(check);
             return check;
+
         } catch (Exception e) {
             UrlCheck check = new UrlCheck();
             check.setUrlId(url.getId());
-            check.setStatusCode(0); // Индикатор ошибки
+            check.setStatusCode(0);
             check.setCreatedAt(Timestamp.from(Instant.now()));
             urlCheckRepository.save(check);
             return check;

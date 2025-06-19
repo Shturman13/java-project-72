@@ -380,30 +380,3 @@ public class AppTests {
     }
 }
 
-
-//    @Test
-//    void testCreateCheckFailure() throws SQLException {
-//        var url = new Url("https://nonexistent.com", Timestamp.from(Instant.now()));
-//        urlRepository.save(url);
-//
-//        JavalinTest.test(app, (server, client) -> {
-//            OkHttpClient noRedirectClient = new OkHttpClient.Builder()
-//                    .followRedirects(false)
-//                    .followSslRedirects(false)
-//                    .build();
-//            var response = noRedirectClient.newCall(new Request.Builder()
-//                    .url("http://localhost:" + server.port() + "/urls/" + url.getId() + "/checks")
-//                    .post(RequestBody.create("", MediaType.parse("application/x-www-form-urlencoded")))
-//                    .build()).execute();
-//            assertThat(response.code()).isEqualTo(302);
-//            assertThat(response.header("Location")).isEqualTo("/urls/" + url.getId());
-//
-//            // Проверяем страницу
-//            var redirectResponse = client.get("/urls/" + url.getId());
-//            assertThat(redirectResponse.code()).isEqualTo(200);
-//
-//            var checks = urlCheckRepository.findByUrlId(url.getId());
-//            assertThat(checks).isEmpty();
-//        });
-//    }
-

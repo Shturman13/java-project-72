@@ -1,8 +1,9 @@
 package hexlet.code;
 
-
+import hexlet.code.controller.UrlsController;
 import hexlet.code.repository.UrlRepository;
 import hexlet.code.repository.UrlCheckRepository;
+
 import io.javalin.Javalin;
 import org.eclipse.jetty.server.session.DefaultSessionCache;
 import org.eclipse.jetty.server.session.DefaultSessionIdManager;
@@ -38,7 +39,7 @@ public class App {
         var app = Javalin.create(config -> {
             config.bundledPlugins.enableDevLogging();
             config.fileRenderer(new JavalinJte(createTemplateEngine()));
-            // Настройка сессий для Javalin 6.6.0 через Jetty
+
             config.jetty.modifyServer(server -> {
                 SessionHandler sessionHandler = new SessionHandler();
                 sessionHandler.setSessionIdManager(new DefaultSessionIdManager(server));
@@ -52,8 +53,8 @@ public class App {
         app.get(NamedRoutes.rootPath(), UrlsController::index);
         app.post(NamedRoutes.urlsPath(), UrlsController::create);
         app.get(NamedRoutes.urlsPath(), UrlsController::list);
-        app.get("/urls/{id}", UrlsController::show);
-        app.post("/urls/{id}/checks", UrlsController::check);
+        app.get(NamedRoutes.urlsPath() + "/{id}", UrlsController::show);
+        app.post(NamedRoutes.urlsPath() + "/{id}/checks", UrlsController::check);
 
         return app;
     }
