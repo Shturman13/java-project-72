@@ -7,6 +7,7 @@ import hexlet.code.repository.UrlRepository;
 import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.service.UrlCheckService;
 import io.javalin.http.Context;
+import io.javalin.http.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.MalformedURLException;
@@ -241,5 +242,43 @@ public class UrlsController {
         }
 
         ctx.redirect(NamedRoutes.urlPath(id));
+    }
+
+    public static void createApi(Context ctx) {
+        String inputUrl = ctx.formParam("url");
+        log.info("Received URL: {}", inputUrl);
+        if (inputUrl == null || inputUrl.isBlank()) {
+            ctx.status(HttpStatus.BAD_REQUEST).json(Map.of("error", "Некорректный URL"));
+            return;
+        }
+        String normalizedUrl;
+        try {
+            URL url = URI.create(inputUrl).toURL();
+            StringBuilder sb = new StringBuilder();
+            sb.append(url.getProtocol()).append("://").append(url.getHost());
+            if (url.getPort() != -1) {
+                sb.append(":").append(url.getPort());
+            }
+            normalizedUrl = sb.toString().toLowerCase();
+            log.info("Normalized URL: {}", normalizedUrl);
+        } catch (MalformedURLException | IllegalArgumentException e) {
+            ctx.status(HttpStatus.BAD_REQUEST).json(Map.of("error", "Некорректный URL"));
+            return;
+        }
+
+        try {
+            Optional<Url> existingUrl = urlRepository.findByName(normalizedUrl);
+            if (existingUrl.isPresent()) {
+                ctx.status(HttpStatus.CONFLICT).json(Map.of("error", "Страница уже существует"));
+                return;
+            }
+
+            Url url = new Url(normalizedUrl, Timestamp.from(Instant.now()));
+            urlRepository.save(url);
+            log.info("URL saved: {}", normalizedUrl);
+            ctx.status(HttpStatus.CREATED).json(Map.of("id", url.getId(), "url", url.getName()));
+        } catch (SQLException e) {
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR).json(Map.of("error", "Ошибка при добавлении URL"));
+        }
     }
 }

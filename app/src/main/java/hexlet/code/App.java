@@ -55,6 +55,7 @@ public class App {
         app.get(NamedRoutes.urlsPath(), UrlsController::list);
         app.get(NamedRoutes.urlsPath() + "/{id}", UrlsController::show);
         app.post(NamedRoutes.urlsPath() + "/{id}/checks", UrlsController::check);
+        app.post("/api/urls", UrlsController::createApi);
 
         return app;
     }
