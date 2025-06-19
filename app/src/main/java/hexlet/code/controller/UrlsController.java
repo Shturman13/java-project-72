@@ -45,7 +45,7 @@ public class UrlsController {
 
     public static void create(Context ctx) {
         String inputUrl = ctx.formParam("url");
-        log.info("Received URL: {}", inputUrl);
+        log.info("Received URL (raw): {}", inputUrl);
         if (inputUrl == null || inputUrl.isBlank()) {
             log.warn("Invalid URL: null or blank");
             ctx.sessionAttribute("flash", "Некорректный URL");
@@ -82,8 +82,8 @@ public class UrlsController {
             }
 
             Url url = new Url(normalizedUrl, Timestamp.from(Instant.now()));
-            url = urlRepository.save(url); // Убедимся, что возвращается обновленный объект
-            log.info("URL saved: {}", normalizedUrl);
+            url = urlRepository.save(url);
+            log.info("URL saved with id: {}", url.getId());
             ctx.sessionAttribute("flash", "Страница успешно добавлена");
             ctx.sessionAttribute("flashType", "success");
             ctx.redirect(NamedRoutes.urlsPath());
