@@ -62,7 +62,7 @@ public class UrlsController {
                 sb.append(":").append(url.getPort());
             }
             normalizedUrl = sb.toString().toLowerCase();
-            log.info("Normalized URL: {}", normalizedUrl);
+            log.info("Normalized URL (before save): {}", normalizedUrl);
         } catch (MalformedURLException | IllegalArgumentException e) {
             log.warn("URL parsing error for input: {}. Reason: {}", inputUrl, e.getMessage());
             ctx.sessionAttribute("flash", "Некорректный URL");
@@ -83,7 +83,7 @@ public class UrlsController {
 
             Url url = new Url(normalizedUrl, Timestamp.from(Instant.now()));
             url = urlRepository.save(url);
-            log.info("URL saved with id: {}", url.getId());
+            log.info("URL saved with id: {} and name: {}", url.getId(), url.getName());
             ctx.sessionAttribute("flash", "Страница успешно добавлена");
             ctx.sessionAttribute("flashType", "success");
             ctx.redirect(NamedRoutes.urlsPath());

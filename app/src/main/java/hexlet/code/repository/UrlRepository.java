@@ -81,6 +81,7 @@ public class UrlRepository {
 
     public Optional<Url> findByName(String name) throws SQLException {
         String sql = "SELECT id, name, created_at FROM page_analyzer WHERE name = ?";
+        log.info("Searching for URL with name: '{}'", name);
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, name);
@@ -88,9 +89,14 @@ public class UrlRepository {
                 if (rs.next()) {
                     Url url = new Url(rs.getString("name"), rs.getTimestamp("created_at"));
                     url.setId(rs.getLong("id"));
+                    log.info("Found URL by name '{}': {}", name, url);
                     return Optional.of(url);
+                } else {
+                    log.warn("No URL found for name: '{}'. Checking table contents...", name);
+                    List<Url> allUrls = findAll();
+                    log.warn("Current table contents: {}", allUrls);
+                    return Optional.empty();
                 }
-                return Optional.empty();
             }
         }
     }
