@@ -20,8 +20,8 @@ public class UrlRepository {
         this.dataSource = dataSource;
     }
 
-    public void save(Url url) throws SQLException {
-        String sql = "INSERT INTO page_analyzer (name, created_at) VALUES (?, ?)";
+    public Url save(Url url) throws SQLException {
+        String sql = "INSERT INTO page_analyzer (name, created_at) VALUES (?, ?)"; // Удаляем RETURNING id
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, url.getName());
@@ -35,7 +35,11 @@ public class UrlRepository {
                     }
                 }
             }
+        } catch (SQLException e) {
+            log.error("Database error saving URL: {}", url.getName(), e);
+            throw e;
         }
+        return url; // Возвращаем объект с установленным id
     }
 
     public List<Url> findAll() throws SQLException {
