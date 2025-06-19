@@ -50,9 +50,7 @@ public class UrlsController {
             log.warn("Invalid URL: null or blank");
             ctx.sessionAttribute("flash", "Некорректный URL");
             ctx.sessionAttribute("flashType", "danger");
-            log.info("POST /urls: Set flash: {}, flashType: {}",
-                    ctx.sessionAttribute("flash"), ctx.sessionAttribute("flashType"));
-            ctx.redirect(NamedRoutes.rootPath()); // 302 на /
+            ctx.redirect(NamedRoutes.rootPath());
             return;
         }
         String normalizedUrl;
@@ -69,9 +67,7 @@ public class UrlsController {
             log.warn("URL parsing error for input: {}. Reason: {}", inputUrl, e.getMessage());
             ctx.sessionAttribute("flash", "Некорректный URL");
             ctx.sessionAttribute("flashType", "danger");
-            log.info("POST /urls: Set flash: {}, flashType: {}",
-                    ctx.sessionAttribute("flash"), ctx.sessionAttribute("flashType"));
-            ctx.redirect(NamedRoutes.rootPath()); // 302 на /
+            ctx.redirect(NamedRoutes.rootPath());
             return;
         }
 
@@ -81,27 +77,21 @@ public class UrlsController {
                 log.info("URL already exists: {}", normalizedUrl);
                 ctx.sessionAttribute("flash", "Страница уже существует");
                 ctx.sessionAttribute("flashType", "info");
-                log.info("POST /urls: Set flash: {}, flashType: {}",
-                        ctx.sessionAttribute("flash"), ctx.sessionAttribute("flashType"));
-                ctx.redirect(NamedRoutes.urlsPath()); // 302 на /urls
+                ctx.redirect(NamedRoutes.urlsPath());
                 return;
             }
 
             Url url = new Url(normalizedUrl, Timestamp.from(Instant.now()));
-            urlRepository.save(url);
+            url = urlRepository.save(url); // Убедимся, что возвращается обновленный объект
             log.info("URL saved: {}", normalizedUrl);
             ctx.sessionAttribute("flash", "Страница успешно добавлена");
             ctx.sessionAttribute("flashType", "success");
-            log.info("POST /urls: Set flash: {}, flashType: {}",
-                    ctx.sessionAttribute("flash"), ctx.sessionAttribute("flashType"));
-            ctx.redirect(NamedRoutes.urlsPath()); // 302 на /urls
+            ctx.redirect(NamedRoutes.urlsPath());
         } catch (SQLException e) {
-            log.error("Database error saving URL: {}", normalizedUrl, e);
+            log.error("Database error saving URL: {}, error: {}", normalizedUrl, e.getMessage());
             ctx.sessionAttribute("flash", "Ошибка при добавлении URL");
             ctx.sessionAttribute("flashType", "danger");
-            log.info("POST /urls: Set flash: {}, flashType: {}",
-                    ctx.sessionAttribute("flash"), ctx.sessionAttribute("flashType"));
-            ctx.redirect(NamedRoutes.rootPath()); // 302 на /
+            ctx.redirect(NamedRoutes.rootPath());
         }
     }
 

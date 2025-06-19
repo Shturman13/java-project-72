@@ -21,7 +21,7 @@ public class UrlRepository {
     }
 
     public Url save(Url url) throws SQLException {
-        String sql = "INSERT INTO page_analyzer (name, created_at) VALUES (?, ?)"; // Удаляем RETURNING id
+        String sql = "INSERT INTO page_analyzer (name, created_at) VALUES (?, ?)";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, url.getName());
@@ -32,14 +32,19 @@ public class UrlRepository {
                 try (ResultSet rs = stmt.getGeneratedKeys()) {
                     if (rs.next()) {
                         url.setId(rs.getLong(1));
+                        log.info("Saved URL with id: {}", url.getId());
+                    } else {
+                        log.warn("No generated key returned for URL: {}", url.getName());
                     }
                 }
+            } else {
+                log.warn("No rows affected while saving URL: {}", url.getName());
             }
+            return url;
         } catch (SQLException e) {
-            log.error("Database error saving URL: {}", url.getName(), e);
+            log.error("Database error saving URL: {}, error: {}", url.getName(), e.getMessage());
             throw e;
         }
-        return url; // Возвращаем объект с установленным id
     }
 
     public List<Url> findAll() throws SQLException {
