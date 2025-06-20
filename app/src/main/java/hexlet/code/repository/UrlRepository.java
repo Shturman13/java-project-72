@@ -21,7 +21,7 @@ public class UrlRepository {
     }
 
     public Url save(Url url) throws SQLException {
-        String sql = "INSERT INTO page_analyzer (name, created_at) VALUES (?, ?)";
+        String sql = "INSERT INTO urls (name, created_at) VALUES (?, ?)";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, url.getName());
@@ -48,7 +48,7 @@ public class UrlRepository {
     }
 
     public List<Url> findAll() throws SQLException {
-        String sql = "SELECT id, name, created_at FROM page_analyzer";
+        String sql = "SELECT id, name, created_at FROM urls";
         List<Url> urls = new ArrayList<>();
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -64,7 +64,7 @@ public class UrlRepository {
     }
 
     public Optional<Url> findById(Long id) throws SQLException {
-        String sql = "SELECT id, name, created_at FROM page_analyzer WHERE id = ?";
+        String sql = "SELECT id, name, created_at FROM urls WHERE id = ?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, id);
@@ -80,7 +80,7 @@ public class UrlRepository {
     }
 
     public Optional<Url> findByName(String name) throws SQLException {
-        String sql = "SELECT id, name, created_at FROM page_analyzer WHERE name = ?";
+        String sql = "SELECT id, name, created_at FROM urls WHERE name = ?";
         log.info("Searching for URL with name: '{}'", name);
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
