@@ -20,6 +20,14 @@ public class UrlCheckService {
         this.urlCheckRepository = urlCheckRepository;
     }
 
+    /**
+     * Checks the URL and saves the result to the database.
+     * This method is not intended for overriding; for custom check logic,
+     * extend this class and use composition to modify behavior safely.
+     * @param url the URL to check
+     * @return the saved URL check
+     * @throws SQLException if a database error occurs
+     */
     public UrlCheck checkUrl(Url url) throws SQLException {
         try {
             HttpResponse<String> response = Unirest.get(url.getName())

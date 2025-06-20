@@ -41,6 +41,11 @@ public class AppTests {
     private UrlCheckRepository urlCheckRepository;
     private MockWebServer mockWebServer;
 
+    /**
+     * Sets up the Javalin application before each test.
+     * This method initializes the app instance. It is not intended for overriding;
+     * for custom setup, extend this class and use composition to modify behavior.
+     */
     @BeforeAll
     void setUpApp() throws SQLException, IOException {
         app = App.getApp();
@@ -71,12 +76,22 @@ public class AppTests {
         }
     }
 
+    /**
+     * Tears down the Javalin application after each test.
+     * This method stops the app instance. It is not intended for overriding;
+     * for custom teardown, extend this class and use composition to modify behavior.
+     */
     @AfterAll
     void tearDownApp() throws IOException {
         app.stop();
         mockWebServer.shutdown();
     }
 
+    /**
+     * Sets up the test environment before each test case.
+     * This method prepares the test context. It is not intended for overriding;
+     * for custom setup, extend this class and use composition to modify behavior.
+     */
     @BeforeEach
     void setUp() throws SQLException {
         DataSource dataSource = DataSourceConfig.getDataSource();
@@ -104,6 +119,11 @@ public class AppTests {
         }
     }
 
+    /**
+     * Tears down the test environment after each test case.
+     * This method cleans up the test context. It is not intended for overriding;
+     * for custom teardown, extend this class and use composition to modify behavior.
+     */
     @AfterEach
     void tearDown() {
         app.stop();

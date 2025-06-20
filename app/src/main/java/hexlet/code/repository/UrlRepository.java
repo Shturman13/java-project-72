@@ -20,6 +20,14 @@ public class UrlRepository {
         this.dataSource = dataSource;
     }
 
+    /**
+     * Saves the URL to the database.
+     * This method is not intended for overriding; for custom save logic,
+     * extend this class and use composition to modify behavior safely.
+     * @param url the URL to save
+     * @return the saved URL with generated ID
+     * @throws SQLException if a database error occurs
+     */
     public Url save(Url url) throws SQLException {
         String sql = "INSERT INTO urls (name, created_at) VALUES (?, ?)";
         try (Connection conn = dataSource.getConnection();
@@ -47,6 +55,13 @@ public class UrlRepository {
         }
     }
 
+    /**
+     * Finds all URLs in the database.
+     * This method is not intended for overriding; for custom query logic,
+     * extend this class and use composition to modify behavior safely.
+     * @return a list of all URLs
+     * @throws SQLException if a database error occurs
+     */
     public List<Url> findAll() throws SQLException {
         String sql = "SELECT id, name, created_at FROM urls";
         List<Url> urls = new ArrayList<>();
@@ -63,6 +78,14 @@ public class UrlRepository {
         }
     }
 
+    /**
+     * Finds a URL by its ID.
+     * This method is not intended for overriding; for custom query logic,
+     * extend this class and use composition to modify behavior safely.
+     * @param id the ID of the URL
+     * @return an optional containing the URL, or empty if not found
+     * @throws SQLException if a database error occurs
+     */
     public Optional<Url> findById(Long id) throws SQLException {
         String sql = "SELECT id, name, created_at FROM urls WHERE id = ?";
         try (Connection conn = dataSource.getConnection();
@@ -79,6 +102,14 @@ public class UrlRepository {
         }
     }
 
+    /**
+     * Finds a URL by its name.
+     * This method is not intended for overriding; for custom query logic,
+     * extend this class and use composition to modify behavior safely.
+     * @param name the name of the URL
+     * @return an optional containing the URL, or empty if not found
+     * @throws SQLException if a database error occurs
+     */
     public Optional<Url> findByName(String name) throws SQLException {
         String sql = "SELECT id, name, created_at FROM urls WHERE name = ?";
         log.info("Searching for URL with name: '{}'", name);

@@ -18,6 +18,13 @@ public class UrlCheckRepository {
         this.dataSource = dataSource;
     }
 
+    /**
+     * Saves the URL check to the database.
+     * This method is not intended for overriding; for custom save logic,
+     * extend this class and use composition to modify behavior safely.
+     * @param urlCheck the URL check to save
+     * @throws SQLException if a database error occurs
+     */
     public void save(UrlCheck urlCheck) throws SQLException {
         String sql = "INSERT INTO url_checks (url_id, status_code, title, h1, description, created_at) "
                 + "VALUES (?, ?, ?, ?, ?, ?)";
@@ -38,6 +45,14 @@ public class UrlCheckRepository {
         }
     }
 
+    /**
+     * Finds all URL checks by URL ID.
+     * This method is not intended for overriding; for custom query logic,
+     * extend this class and use composition to modify behavior safely.
+     * @param urlId the ID of the URL
+     * @return a list of URL checks
+     * @throws SQLException if a database error occurs
+     */
     public List<UrlCheck> findByUrlId(Long urlId) throws SQLException {
         String sql = "SELECT * FROM url_checks WHERE url_id = ? ORDER BY created_at DESC";
         List<UrlCheck> checks = new ArrayList<>();
@@ -61,6 +76,14 @@ public class UrlCheckRepository {
         return checks;
     }
 
+    /**
+     * Finds the last URL check by URL ID.
+     * This method is not intended for overriding; for custom query logic,
+     * extend this class and use composition to modify behavior safely.
+     * @param urlId the ID of the URL
+     * @return an optional containing the last check, or empty if not found
+     * @throws SQLException if a database error occurs
+     */
     public Optional<UrlCheck> findLastCheckByUrlId(Long urlId) throws SQLException {
         String sql = "SELECT * FROM url_checks WHERE url_id = ? ORDER BY created_at DESC LIMIT 1";
         try (Connection conn = dataSource.getConnection();
